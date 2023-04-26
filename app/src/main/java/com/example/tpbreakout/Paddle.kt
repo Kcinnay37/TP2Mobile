@@ -20,7 +20,7 @@ import android.hardware.SensorManager
 
 
 
-class Paddle(context:Context) : View(context), SensorEventListener
+class Paddle()
 {
     private val paintPaddle = Paint().apply { color = Color.BLUE }
     private var paintButtonLeft = Paint().apply { color = Color.argb(128, 255, 0, 0) }
@@ -31,7 +31,7 @@ class Paddle(context:Context) : View(context), SensorEventListener
         textAlign = Paint.Align.CENTER
     }
 
-    private var moveSpeed = 10f;
+    private var moveSpeed = 600f;
     private var moveDir: Int = 0;
 
     private var offsetSpawn = 150f;
@@ -53,9 +53,6 @@ class Paddle(context:Context) : View(context), SensorEventListener
     private var screenWidth = 0;
     private var screenHeight = 0;
 
-    private lateinit var sensorManager: SensorManager;
-    private lateinit var accelerometer: Sensor;
-
     private var moveWithInput: Boolean = false;
 
     init
@@ -68,14 +65,10 @@ class Paddle(context:Context) : View(context), SensorEventListener
 
         rectButtonRight = Rect(0f, 0f, 100f, 100f);
         colliderButtonRight = BoxCollider();
-
-        sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME)
     }
 
     //comment je peux faire que cela s'appel chaque frame que lecran est appuyer?
-    override fun onTouchEvent(event: MotionEvent?): Boolean
+    public fun onTouchEvent(event: MotionEvent?): Boolean
     {
         if (event != null)
         {
@@ -89,20 +82,13 @@ class Paddle(context:Context) : View(context), SensorEventListener
 
                         touchePos = event.x;
 
-                        if(abs(touchePos - paddlePos) > moveSpeed)
+                        if(touchePos - paddlePos < 0)
                         {
-                            if(touchePos - paddlePos < 0)
-                            {
-                                moveDir = -1;
-                            }
-                            else
-                            {
-                                moveDir = 1;
-                            }
+                            moveDir = -1;
                         }
                         else
                         {
-                            moveDir = 0;
+                            moveDir = 1;
                         }
                     }
                     moveWithInput = true;
@@ -120,11 +106,10 @@ class Paddle(context:Context) : View(context), SensorEventListener
     }
 
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int)
+    fun onSizeChanged(sW: Int, sH: Int)
     {
-        super.onSizeChanged(w, h, oldw, oldh);
-        screenWidth = w;
-        screenHeight = h;
+        screenWidth = sW;
+        screenHeight = sH;
 
         rectPaddle.pY = screenHeight - rectPaddle.sY - offsetSpawn;
         rectPaddle.pX = (screenWidth / 2) - (rectPaddle.sX / 2);
@@ -138,11 +123,15 @@ class Paddle(context:Context) : View(context), SensorEventListener
         rectButtonRight.sX = (screenWidth / 2f) - offsetButton;
     }
 
-    override fun onDraw(canvas: Canvas)
+    fun onDraw(canvas: Canvas, dt: Float)
     {
-        super.onDraw(canvas)
+        var paddlePos = rectPaddle.pX + rectPaddle.sX / 2;
+        if(abs(touchePos - paddlePos) <= moveSpeed * dt)
+        {
+            moveDir = 0;
+        }
 
-        rectPaddle.pX += moveSpeed * moveDir;
+        rectPaddle.pX += moveSpeed * moveDir * dt;
 
         if(rectPaddle.pX < 0f)
         {
@@ -151,12 +140,6 @@ class Paddle(context:Context) : View(context), SensorEventListener
         if(rectPaddle.pX + rectPaddle.sX > screenWidth)
         {
             rectPaddle.pX = screenWidth - rectPaddle.sX;
-        }
-
-        var paddlePos = rectPaddle.pX + rectPaddle.sX / 2;
-        if(abs(touchePos - paddlePos) <= moveSpeed)
-        {
-            moveDir = 0;
         }
 
         canvas.save();
@@ -185,9 +168,7 @@ class Paddle(context:Context) : View(context), SensorEventListener
         val rightTextY = rectButtonRight.pY + (rectButtonRight.sY / 2) - (paintText.descent() + paintText.ascent()) / 2
         canvas.drawText(textButtonRight, rightTextX, rightTextY, paintText)
 
-
         UpdateCollider();
-        invalidate();
     }
 
     private fun UpdateCollider()
@@ -225,7 +206,8 @@ class Paddle(context:Context) : View(context), SensorEventListener
     }
 
 
-    override fun onSensorChanged(event: SensorEvent) {
+    public fun onSensorChanged(event: SensorEvent)
+    {
         if (event.sensor.type == Sensor.TYPE_ACCELEROMETER)
         {
             if(moveWithInput) return;
@@ -247,12 +229,6 @@ class Paddle(context:Context) : View(context), SensorEventListener
                 moveDir = 0;
             }
         }
-    }
-
-    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int)
-    {
-        super.onDetachedFromWindow();
-        sensorManager.unregisterListener(this);
     }
 
     public fun GetCollider() : BoxCollider

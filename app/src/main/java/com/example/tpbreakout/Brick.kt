@@ -8,7 +8,7 @@ import android.view.View
 
 data class BrickData(val rect: Rect, val collider: BoxCollider);
 
-class Brick(context: Context) : View(context)
+class Brick()
 {
     private val paintBrick = Paint().apply { color = Color.GREEN }
 
@@ -18,7 +18,7 @@ class Brick(context: Context) : View(context)
     private var nbInitialLine: Int = 4;
     private var nbMaxLine: Int = 10;
 
-    private var delaySpawnLine: Float = 20f;
+    private var delaySpawnLine: Float = 30f;
     private var currTime: Float = 0f;
 
     private var offsetRatioBrick: Float = 100f;
@@ -34,11 +34,10 @@ class Brick(context: Context) : View(context)
         listBrick = mutableListOf<BrickData>();
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int)
+    fun onSizeChanged(sW: Int, sH: Int)
     {
-        super.onSizeChanged(w, h, oldw, oldh);
-        screenWidth = w;
-        screenHeight = h;
+        screenWidth = sW;
+        screenHeight = sH;
 
         for(i in 0..nbInitialLine)
         {
@@ -46,10 +45,8 @@ class Brick(context: Context) : View(context)
         }
     }
 
-    override fun onDraw(canvas: Canvas)
+    fun onDraw(canvas: Canvas)
     {
-        super.onDraw(canvas);
-
         for(brickData: BrickData in listBrick)
         {
             canvas.save();
@@ -58,8 +55,6 @@ class Brick(context: Context) : View(context)
             canvas.drawRect(0f, 0f, brickData.rect.sX, brickData.rect.sY, paintBrick);
             canvas.restore();
         }
-
-        invalidate();
     }
 
     private fun AddLine()

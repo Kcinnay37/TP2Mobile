@@ -7,15 +7,15 @@ import android.graphics.Paint
 import android.view.View
 import kotlin.math.abs
 
-class Ball(context: Context) : View(context)
+class Ball()
 {
     private val paintBall = Paint().apply { color = Color.BLACK }
 
     private lateinit var rectBall: Rect;
     private lateinit var colliderBall: BoxCollider;
 
-    private var speedX: Float = 5f;
-    private var speedY: Float = 15f;
+    private var speedX: Float = 450f;
+    private var speedY: Float = 700f;
 
     private var dirX: Int = 1;
     private var dirY: Int = 1;
@@ -29,19 +29,16 @@ class Ball(context: Context) : View(context)
 
     private var onGround: Boolean = false;
 
-
     init
     {
         rectBall = Rect(0f, 0f, 50f, 50f);
         colliderBall = BoxCollider();
     }
 
-    override fun onDraw(canvas: Canvas)
+    fun onDraw(canvas: Canvas, dt: Float)
     {
-        super.onDraw(canvas);
-
-        rectBall.pX += speedX * dirX;
-        rectBall.pY += speedY * dirY;
+        rectBall.pX += speedX * dirX * dt;
+        rectBall.pY += speedY * dirY * dt;
 
         canvas.save();
         canvas.translate(rectBall.pX, rectBall.pY);
@@ -50,7 +47,6 @@ class Ball(context: Context) : View(context)
         canvas.restore();
 
         UpdateCollider();
-        invalidate();
     }
 
     private fun UpdateCollider()
@@ -58,11 +54,10 @@ class Ball(context: Context) : View(context)
         colliderBall.UpdateCollider(rectBall);
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int)
+    fun onSizeChanged(sW: Int, sH: Int)
     {
-        super.onSizeChanged(w, h, oldw, oldh);
-        screenWidth = w;
-        screenHeight = h;
+        screenWidth = sW;
+        screenHeight = sH;
 
         rectBall.pX = (screenWidth / 2) - (rectBall.sX / 2);
         rectBall.pY = (screenHeight / 2) - (rectBall.sY / 2) + offsetSpawn;

@@ -1,5 +1,6 @@
 package com.example.tpbreakout
 
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -9,9 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 class Breakout : AppCompatActivity()
 {
     private lateinit var relativeLayout: RelativeLayout;
-    private lateinit var paddle: Paddle;
-    private lateinit var ball: Ball;
-    private lateinit var brick: Brick;
+    private lateinit var breakoutView: BreakoutView;
 
     private val UPDATE_INTERVAL = 16L;
     private val handler = Handler(Looper.getMainLooper());
@@ -36,14 +35,10 @@ class Breakout : AppCompatActivity()
         super.onCreate(savedInstanceState);
 
         relativeLayout = RelativeLayout(this);
+        relativeLayout.setBackgroundColor(Color.WHITE);
 
-        paddle = Paddle(this);
-        ball = Ball(this);
-        brick = Brick(this);
-
-        relativeLayout.addView(paddle);
-        relativeLayout.addView(ball);
-        relativeLayout.addView(brick);
+        breakoutView = BreakoutView(this);
+        relativeLayout.addView(breakoutView);
 
         setContentView(relativeLayout);
 
@@ -64,26 +59,23 @@ class Breakout : AppCompatActivity()
         deltaTime = (currentTime - lastUpdateTime) / 1000.0f
         lastUpdateTime = currentTime
 
-        ball.CheckScreen();
-        ball.CheckColliderWithPaddle(paddle.GetCollider());
-        ball.CheckColliderWithBrick(brick.GetBricks());
+        //breakoutView.UpdateCollider();
 
         if(win) return;
 
-        if(brick.GetBricks().count() == 0)
+        if(breakoutView.CheckWin())
         {
             win = true;
         }
 
-        if(ball.CheckOnGround())
+        if(breakoutView.CheckLose())
         {
             lose = true;
-            relativeLayout.removeView(ball);
         }
 
         if(!lose && !win)
         {
-            brick.UpdateSpawnBrick(deltaTime);
+            breakoutView.UpdateSpawnBrick(deltaTime);
         }
     }
 }
